@@ -15,6 +15,17 @@ app.get('/users', async (req, res) => {
     res.send(user)
 })
 
+app.get('/users/:id', async (req, res) => {
+    const id = Number(req.params.id)
+    const findUserById = await prisma.users.findUnique({ where: { id }, include: { Hoobies: true } })
+
+    if (findUserById) {
+        res.send(findUserById)
+    } else {
+        res.status(404).send({ error: "User not found" })
+    }
+})
+
 app.post('/users', async (req, res) => {
     const newUser = await prisma.users.create({ data: req.body, include: { Hoobies: true } })
     res.send(newUser)
@@ -37,6 +48,17 @@ app.delete('/users/:id', async (req, res) => {
 app.get('/hoobies', async (req, res) => {
     const hoobies = await prisma.hoobies.findMany({ include: { user: true } })
     res.send(hoobies)
+})
+
+app.get('/hoobies/:id', async (req, res) => {
+    const id = Number(req.params.id)
+    const findHobbyById = await prisma.hoobies.findUnique({ where: { id }, include: { user: true } })
+
+    if (findHobbyById) {
+        res.send(findHobbyById)
+    } else {
+        res.status(404).send({ error: "Hobby not found" })
+    }
 })
 
 app.post('/hoobies', async (req, res) => {

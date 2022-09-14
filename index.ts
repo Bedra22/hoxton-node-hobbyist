@@ -26,9 +26,35 @@ app.get('/users/:id', async (req, res) => {
     }
 })
 
+// app.post('/users', async (req, res) => {
+//     const newUser = await prisma.users.create({ data: req.body, include: { Hoobies: true } })
+//     res.send(newUser)
+// })
+
 app.post('/users', async (req, res) => {
-    const newUser = await prisma.users.create({ data: req.body, include: { Hoobies: true } })
+    const createUser = {
+        name: req.body.name,
+        imageURL: req.body.imageURL,
+        email: req.body.email,
+        Hoobies: req.body.Hoobies ? req.body.Hoobies : []
+    }
+    const newUser = await prisma.users.create({
+        data: {
+            name: createUser.name,
+            imageURL: createUser.imageURL,
+            email: createUser.email,
+            Hoobies: {
+                // @ts-ignore
+                connectOrCreate: createUser.Hoobies.map(newOrOldHoobie => ({
+                    where: { name: newOrOldHoobie },
+                    create: { name: newOrOldHoobie }
+                }))
+            }
+        },
+        include: { Hoobies: true }
+    })
     res.send(newUser)
+
 })
 
 app.patch('/users/:id', async (req, res) => {
